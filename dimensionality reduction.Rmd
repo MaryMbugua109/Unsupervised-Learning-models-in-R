@@ -1,0 +1,34 @@
+##PCA
+
+#Importing our dataset
+```{r,echo=TRUE}
+Carrefour<-read.csv("http://bit.ly/CarreFourDataset",sep = ",")
+
+head(Carrefour)
+```
+
+# Installing Rtnse package
+```{r,echo=TRUE} 
+install.packages("Rtsne")
+```
+
+# Curating the database for analysis 
+```{r,echo=TRUE}
+library(Rtsne)
+tsne <- Rtsne(Carrefour, dims = 2, perplexity=30, verbose=TRUE, max_iter = 500)
+```
+** Getting the duration of execution**
+```{r,echo=TRUE} 
+exeTimeTsne <- system.time(Rtsne(Carrefour, dims = 2, perplexity=30, verbose=TRUE, max_iter = 500))
+```
+
+** Plotting our graph and closely examining the graph**
+```{r,echo=TRUE}
+plot(tsne$Y, t='n', main="tsne")
+text(tsne$Y)
+```
+
+
+
+
+
