@@ -1,0 +1,57 @@
+# Importing our dataset
+```{r,echo=TRUE}
+sales<-read.csv("http://bit.ly/CarreFourSalesDataset")
+head(sales)
+```
+
+# Checking the data
+```{r,echo=TRUE}
+str(sales)
+```
+```{r,echo=TRUE}
+summary(sales)
+```
+*Checking the number of rows and in our dataset*
+```{r,echo=TRUE}
+cat("Rows in dataset:", nrow(sales), "\nCols in dataset:", ncol(sales))
+cat("\nThe dimension of the dataset is:", dim(sales))
+```
+#Perform Data Cleaning
+*checking for duplicates*
+```{r,echo=TRUE}
+sum(duplicated(sales))
+```
+We don't have duplicated data.
+
+*Checking for missing values*
+```{r,echo=TRUE}
+cat("\n the columns with missing data are:",colSums(is.na(sales)))
+```
+We also don't have missing data.
+
+*Checking for outliers*
+```{r,echo=TRUE}
+boxplot(sales$Sales)
+```
+We have outliers in the sales column which will not drop.
+
+# Anomaly Detection
+** Installing anomalize package**
+```{r}
+install.packages("anomalize")
+```
+library(tidyverse)
+library(anomalize)
+
+**# Collect our time series data**
+tidyverse_cran_downloads
+
+# Detecting our anomalies
+```{r,echo=TRUE}
+tidyverse_cran_downloads %>%
+    time_decompose(count) %>%
+    anomalize(remainder) %>%
+    time_recompose() %>%
+    plot_anomalies(time_recomposed = TRUE, ncol = 3, alpha_dots = 0.5)
+```
+The anomalies are the points in red. They therefore need to be investigated.

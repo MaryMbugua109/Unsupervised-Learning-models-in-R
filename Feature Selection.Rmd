@@ -1,0 +1,176 @@
+# Importing the dataset
+```{r,echo=TRUE}
+Carrefour<-read.csv("http://bit.ly/CarreFourDataset")
+head(Carrefour)
+```
+
+# Filter Methods
+** Installing and loading our caret package**
+```{R,ECHO=true}
+suppressWarnings(
+        suppressMessages(if
+                         (!require(caret, quietly=TRUE))
+                install.packages("caret")))
+library(caret)
+```
+
+** Installing and loading the corrplot package for plotting**
+```{r,echo=TRUE}
+suppressWarnings(
+        suppressMessages(if
+                         (!require(corrplot, quietly=TRUE))
+                install.packages("corrplot")))
+library(corrplot)
+```
+
+**Selecting the numerical data and excluding the categorical
+```{r,echo=TRUE}
+df<-Carrefour[,c(6,7,8,12,13,14,15,16)]
+head(df)
+```
+
+```{r,echo=TRUE}
+summary(df)
+```
+
+** Removing variables with zero variance**
+```{r,echo=TRUE}
+df_f<-df[,apply(df,2,var,na.rm=TRUE)!=0]
+df_f
+```
+
+** Calculating the correlation matrix**
+```{r,echo=TRUE}
+correlationMatrix <- cor(df_f)
+```
+
+**Find attributes that are highly correlated**
+```{r,echo=TRUE}
+highlyCorrelated <- findCorrelation(correlationMatrix, cutoff=0.75)
+```
+
+**Highly correlated attributes**
+```{r,echo=TRUE}
+highlyCorrelated
+
+names(df_f[,highlyCorrelated])
+```
+
+** Removing Redundant Features** 
+```{r,echo=TRUE} 
+df_f2<-df_f[-highlyCorrelated]
+```
+
+# Performing our graphical comparison
+```{r,echo=TRUE} 
+par(mfrow = c(1, 2))
+corrplot(correlationMatrix, order = "hclust")
+corrplot(cor(df_f2), order = "hclust")
+```
+This represents the graphical correlation of the variables after removing the highly correlated variables.
+
+# Wrapper Method
+** Installing and loading our clustvarsel package**
+suppressWarnings(
+        suppressMessages(if
+                         (!require(clustvarsel, quietly=TRUE))
+                install.packages("clustvarsel")))
+                         
+library(clustvarsel)
+
+**Installing and loading our mclust package**
+suppressWarnings(
+        suppressMessages(if
+                         (!require(mclust, quietly=TRUE))
+                install.packages("mclust")))
+library(mclust)
+
+** Sequential forward greedy search (default)**
+```{r,echo=TRUE}
+out = clustvarsel(df_f,g=)
+out
+```
+
+** building the clustering model**
+```{r,echo=TRUE}
+Subset1 = df_f[,out$subset]
+mod = Mclust(Subset1)
+summary(mod)
+```
+
+
+# Embedded Methods
+** We install and load our wskm package**
+
+suppressWarnings(
+        suppressMessages(if
+                         (!require(wskm, quietly=TRUE))
+                install.packages("wskm")))
+library(wskm)
+
+set.seed(2)
+model <- ewkm(df_f, 3, lambda=2, maxiter=1000)
+
+** Loading and installing our cluster package**
+
+suppressWarnings(
+        suppressMessages(if
+                         (!require(cluster, quietly=TRUE))
+                install.packages("cluster")))
+library("cluster")
+
+## Plotting
+** Cluster Plot against 1st 2 principal components**
+```{r,echo=TRUE}
+clusplot(df_f, model$cluster, color=TRUE, shade=TRUE,
+         labels=8, lines=1,main='Cluster Analysis for Carrefour')
+```
+Weights are calculated for each variable and cluster. 
+They are a measure of the relative importance of each variable 
+with regards to the membership of the observations to that cluster.
+
+# Feature Ranking
+** We install and load the required packages**
+ 
+suppressWarnings(
+        suppressMessages(if
+                         (!require(FSelector, quietly=TRUE))
+                install.packages("FSelector")))
+library(FSelector)
+
+** using the correlation coefficient as a unit of valuation**
+```{r,echo=TRUE}
+Scores <- linear.correlation(medv~., df_f)
+Scores
+```
+
+**Determining our cutoff**
+```{r,echo=TRUE}
+Subset <- cutoff.k(Scores, 5)
+as.data.frame(Subset)
+```
+
+**Getting our cutoff as a percentage**
+```{r,echo=TRUE}
+Subset2 <-cutoff.k.percent(Scores, 0.4)
+as.data.frame(Subset2)
+```
+
+**Using entropy based approach**
+```{r,echo=TRUE}
+Scores2 <- information.gain(medv~.,df_f)
+```
+
+** Choosing Variables by cutoffSubset <- cutoff.k(Scores2, 5)**
+```{r,echo=TRUE}
+Subset3 <- cutoff.k(Scores2, 5)
+as.data.frame(Subset3)
+```
+
+```{r,echo=TRUE}
+Subset3 <- cutoff.k(Scores2, 5)
+as.data.frame(Subset3)
+```
+
+-Feature selection has helped us reduce the number of features in our dataset
+by excluding the highly correlated variables(Filter methods) or by including them without any change as compared to dimensionality reduction.
